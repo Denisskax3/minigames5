@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Потрать деньги миллиардера | Креативная Песочница</title>
+    <title>Потрать деньги миллиардера | PNG Версия</title>
     <style>
         :root {
             --bg-color: #0f172a;
@@ -25,7 +25,6 @@
             padding-bottom: 40px;
         }
 
-        /* Кнопка Назад */
         .back-button {
             position: absolute;
             top: 20px;
@@ -60,7 +59,6 @@
             margin-bottom: 10px;
         }
 
-        /* Огромное табло с деньгами (прилипает к верху при скролле) */
         .money-bar {
             position: sticky;
             top: 0;
@@ -73,10 +71,8 @@
             z-index: 90;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
             text-shadow: 0 2px 4px rgba(0,0,0,0.2);
-            transition: background 0.3s;
         }
 
-        /* Сетка товаров */
         .shop-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -95,12 +91,27 @@
             display: flex;
             flex-direction: column;
             justify-content: space-between;
+            align-items: center;
         }
 
-        .item-emoji {
-            font-size: 4rem;
-            margin-bottom: 10px;
+        /* Стиль для контейнера картинок */
+        .item-image-container {
+            width: 100%;
+            height: 130px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+            overflow: hidden;
+        }
+
+        /* Стиль для самих PNG-картинок */
+        .item-image {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain; /* Картинка сохраняет пропорции и не сжимается криво */
             user-select: none;
+            -webkit-user-drag: none;
         }
 
         .item-name {
@@ -116,12 +127,12 @@
             margin-bottom: 20px;
         }
 
-        /* Кнопки управления покупками */
         .item-controls {
             display: grid;
             grid-template-columns: 1fr 1fr 1fr;
             gap: 10px;
             align-items: center;
+            width: 100%;
         }
 
         .btn {
@@ -131,7 +142,6 @@
             font-weight: 700;
             border-radius: 8px;
             cursor: pointer;
-            user-select: none;
             transition: background 0.2s, transform 0.1s;
         }
 
@@ -139,37 +149,22 @@
             transform: scale(0.95);
         }
 
-        .btn-sell {
-            background-color: #ef4444;
-            color: white;
-        }
-        .btn-sell:disabled {
-            background-color: #475569;
-            color: #94a3b8;
-            cursor: not-allowed;
-        }
+        .btn-sell { background-color: #ef4444; color: white; }
+        .btn-sell:disabled { background-color: #475569; color: #94a3b8; cursor: not-allowed; }
 
-        .btn-buy {
-            background-color: #22c55e;
-            color: white;
-        }
-        .btn-buy:disabled {
-            background-color: #475569;
-            color: #94a3b8;
-            cursor: not-allowed;
-        }
+        .btn-buy { background-color: #22c55e; color: white; }
+        .btn-buy:disabled { background-color: #475569; color: #94a3b8; cursor: not-allowed; }
 
         .item-count {
             font-size: 1.2rem;
             font-weight: bold;
-            text-align: center;
         }
 
-        /* Мобильная адаптация */
         @media (max-width: 480px) {
             header h1 { font-size: 1.5rem; }
             .money-bar { font-size: 1.8rem; padding: 15px; }
             .shop-grid { grid-template-columns: 1fr; gap: 15px; }
+            .item-image-container { height: 110px; }
         }
     </style>
 </head>
@@ -182,54 +177,47 @@
         <p style="color: #94a3b8;">У вас неприлично много денег. Сможете потратить всё?</p>
     </header>
 
-    <!-- Закрепленный баланс -->
     <div class="money-bar" id="moneyDisplay">$100,000,000,000</div>
 
-    <!-- Магазин -->
     <div class="shop-grid" id="shopGrid"></div>
 
     <script>
-        // Стартовый баланс: 100 миллиардов долларов
         let currentMoney = 100000000000;
 
-        // База данных товаров
+        // База данных товаров с PNG картинками из открытых источников
         const products = [
-            { id: 0, name: "Сочный Бургер", price: 5, emoji: "🍔", count: 0 },
-            { id: 1, name: "Билет в кино", price: 15, emoji: "🍿", count: 0 },
-            { id: 2, name: "Игровая приставка", price: 500, emoji: "🎮", count: 0 },
-            { id: 3, name: "Смартфон флагман", price: 1000, emoji: "📱", count: 0 },
-            { id: 4, name: "Бриллиантовое кольцо", price: 10000, emoji: "💍", count: 0 },
-            { id: 5, name: "Роскошные часы", price: 25000, emoji: "⌚", count: 0 },
-            { id: 6, name: "Спортивный суперкар", price: 250000, emoji: "🏎️", count: 0 },
-            { id: 7, name: "Частный вертолет", price: 2000000, emoji: "🚁", count: 0 },
-            { id: 8, name: "Особняк в Беверли-Хиллз", price: 25000000, emoji: "🏰", count: 0 },
-            { id: 9, name: "Пассажирский Боинг", price: 150000000, emoji: "🛩️", count: 0 },
-            { id: 10, name: "Тропический остров", price: 1000000000, emoji: "🏝️", count: 0 },
-            { id: 11, name: "Космическая ракета", price: 5000000000, emoji: "🚀", count: 0 }
+            { id: 0, name: "Сочный Бургер", price: 5, img: "../png/burger.png", count: 0 },
+            { id: 1, name: "Игровая приставка", price: 500, img: "https://icons8.com", count: 0 },
+            { id: 2, name: "Смартфон флагман", price: 1000, img: "https://icons8.com", count: 0 },
+            { id: 3, name: "Бриллиантовое кольцо", price: 10000, img: "https://icons8.com", count: 0 },
+            { id: 4, name: "Пикап", price: 250000, img: "../png/picap.png", count: 0 },
+            { id: 5, name: "Спортивный суперкар", price: 250000, img: "https://icons8.com", count: 0 },
+            { id: 6, name: "Частный вертолет", price: 2000000, img: "https://icons8.com", count: 0 },
+            { id: 7, name: "Особняк", price: 25000000, img: "https://icons8.com", count: 0 },
+            { id: 8, name: "Тропический остров", price: 1000000000, img: "https://icons8.com", count: 0 }
         ];
 
         const moneyDisplay = document.getElementById('moneyDisplay');
         const shopGrid = document.getElementById('shopGrid');
 
-        // Функция красивого форматирования денег (добавляет запятые)
         function formatMoney(amount) {
             return '$' + amount.toLocaleString('en-US');
         }
 
-        // Генерация карточек товаров в HTML
         function renderShop() {
             shopGrid.innerHTML = '';
             products.forEach(product => {
                 const card = document.createElement('div');
                 card.className = 'item-card';
                 
-                // Проверяем, доступны ли кнопки
                 const canBuy = currentMoney >= product.price;
                 const canSell = product.count > 0;
 
                 card.innerHTML = `
-                    <div class="item-emoji">${product.emoji}</div>
-                    <div>
+                    <div class="item-image-container">
+                        <img src="${product.img}" alt="${product.name}" class="item-image">
+                    </div>
+                    <div style="width: 100%">
                         <div class="item-name">${product.name}</div>
                         <div class="item-price">${formatMoney(product.price)}</div>
                     </div>
@@ -242,10 +230,8 @@
                 shopGrid.appendChild(card);
             });
             
-            // Обновляем верхнее табло
             moneyDisplay.textContent = formatMoney(currentMoney);
             
-            // Если деньги кончились, делаем фон табло серым
             if (currentMoney === 0) {
                 moneyDisplay.style.background = '#475569';
                 moneyDisplay.textContent = "Вы умудрились потратить ВСЁ!";
@@ -254,7 +240,6 @@
             }
         }
 
-        // Логика покупки
         window.buyItem = function(id) {
             const product = products.find(p => p.id === id);
             if (currentMoney >= product.price) {
@@ -264,7 +249,6 @@
             }
         };
 
-        // Логика продажи
         window.sellItem = function(id) {
             const product = products.find(p => p.id === id);
             if (product.count > 0) {
@@ -274,7 +258,6 @@
             }
         };
 
-        // Старт игры
         renderShop();
     </script>
 </body>

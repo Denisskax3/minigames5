@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-select=none">
+    <title>Бесконечный Кликер | Креативная Песочница</title>
+    <style>
+        :root {
+            --bg-color: #0b0f19;
+            --card-bg: #1e2640;
+            --text-color: #f3f4f6;
+            --accent-color: #3b82f6;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        .back-button {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 14px;
+            background-color: var(--card-bg);
+            color: #f3f4f6;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            z-index: 100;
+        }
+
+        .game-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex-grow: 1;
+            width: 100%;
+            max-width: 600px;
+            padding: 20px;
+            margin-top: 50px;
+        }
+
+        .score-container {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .score {
+            font-size: 3rem;
+            font-weight: 800;
+            background: linear-gradient(45deg, #60a5fa, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .cps {
+            color: #9ca3af;
+            font-size: 1rem;
+            margin-top: 5px;
+        }
+
+        .click-zone {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            margin-bottom: 40px;
+        }
+
+        .click-btn {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #2563eb, #7c3aed);
+            border: none;
+            font-size: 4.5rem;
+            cursor: pointer;
+            box-shadow: 0 0 30px rgba(124, 58, 237, 0.4);
+            transition: transform 0.05s ease;
+            outline: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .click-btn:active {
+            transform: scale(0.92);
+        }
+
+        .floating-number {
+            position: absolute;
+            font-size: 1.6rem;
+            font-weight: bold;
+            color: #60a5fa;
+            pointer-events: none;
+            animation: floatUp 0.6s ease-out forwards;
+            z-index: 10;
+        }
+
+        @keyframes floatUp {
+            0% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+            100% { transform: translate(-50%, -180%) scale(0.8); opacity: 0; }
+        }
+
+        .upgrades-container {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .upgrade-card {
+            background-color: var(--card-bg);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 14px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+        }
+
+        .upgrade-card.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .upgrade-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .upgrade-title { font-weight: 600; font-size: 1.1rem; }
+        .upgrade-desc { font-size: 0.85rem; color: #9ca3af; }
+        .upgrade-cost { font-weight: bold; color: #34d399; font-size: 1.1rem; }
+
+        @media (max-width: 480px) {
+            .score { font-size: 2.3rem; }
+            .click-zone { width: 160px; height: 160px; }
+            .click-btn { font-size: 3.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <a href="../index.html" class="back-button">← Главная</a>
+
+    <div class="game-container">
+        <div class="score-container">
+            <div class="score" id="scoreDisplay">0</div>
+            <div class="cps" id="cpsDisplay">В секунду: 0</div>
+        </div>
+
+        <div class="click-zone" id="clickZone">
+            <button class="click-btn" id="clickBtn">⚡</button>
+        </div>
+
+        <div class="upgrades-container">
+            <div class="upgrade-card disabled" id="upgrade-0" onclick="buyUpgrade(0)">
+                <div class="upgrade-info">
+                    <span class="upgrade-title">🦾 Авто-кликер</span>
+                    <span class="upgrade-desc">Кликает сам (+1 в сек) · <span id="count-0">0</span> шт.</span>
+                </div>
+                <div class="upgrade-cost" id="cost-0">15</div>
+            </div>
+
+            <div class="upgrade-card disabled" id="upgrade-1" onclick="buyUpgrade(1)">
+                <div class="upgrade-info">
+                    <span class="upgrade-title">⚡ Мощный клик</span>
+                    <span class="upgrade-desc">Каждое нажатие дает +1 к силе клика</span>
+                </div>
+                <div class="upgrade-cost" id="cost-1">50</div>
+            </div>
+
+            <div class="upgrade-card disabled" id="upgrade-2" onclick="buyUpgrade(2)">
+                <div class="upgrade-info">
+                    <span class="upgrade-title">🤖 Суперкомпьютер</span>
+                    <span class="upgrade-desc">Майнит очки быстрее (+10 в сек) · <span id="count-2">0</span> шт.</span>
+                </div>
+                <div class="upgrade-cost" id="cost-2">500</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let score = 0;
+        let clickPower = 1;
+        let gps = 0;
+
+        const upgrades = [
+            { id: 0, cost: 15, cpsEffect: 1, clickEffect: 0, count: 0 },
+            { id: 1, cost: 50, cpsEffect: 0, clickEffect: 1, count: 0 },
+            { id: 2, cost: 500, cpsEffect: 10, clickEffect: 0, count: 0 }
+        ];
+
+        const scoreDisplay = document.getElementById('scoreDisplay');
+        const cpsDisplay = document.getElementById('cpsDisplay');
+        const clickBtn = document.getElementById('clickBtn');
+        const clickZone = document.getElementById('clickZone');
+
+        // Клик по кнопке (работает на ПК и смартфонах одинаково стабильно)
+        clickBtn.addEventListener('click', () => {
+            score += clickPower;
+            createFloatingNumber();
+            updateUI();
+        });
+
+        function createFloatingNumber() {
+            const num = document.createElement('div');
+            num.className = 'floating-number';
+            num.textContent = `+${clickPower}`;
+            
+            // Фиксируем цифру строго по центру круга для надежности на телефонах
+            num.style.left = '50%';
+            num.style.top = '50%';
+            
+            clickZone.appendChild(num);
+            setTimeout(() => num.remove(), 600);
+        }
+
+        window.buyUpgrade = function(id) {
+            const up = upgrades.find(item => item.id === id);
+            if (score >= up.cost) {
+                score -= up.cost;
+                up.count++;
+                
+                clickPower += up.clickEffect;
+                gps += up.cpsEffect;
+                
+                up.cost = Math.round(up.cost * 1.3);
+                updateUI();
+            }
+        };
+
+        function updateUI() {
+            scoreDisplay.textContent = Math.floor(score).toLocaleString();
+            cpsDisplay.textContent = `В секунду: ${gps}`;
+
+            upgrades.forEach(up => {
+                const card = document.getElementById(`upgrade-${up.id}`);
+                const costLabel = document.getElementById(`cost-${up.id}`);
+                const countLabel = document.getElementById(`count-${up.id}`);
+                
+                if (costLabel) costLabel.textContent = up.cost.toLocaleString();
+                if (countLabel) countLabel.textContent = up.count;
+
+                if (score >= up.cost) {
+                    card.classList.remove('disabled');
+                } else {
+                    card.classList.add('disabled');
+                }
+            });
+        }
+
+        // Таймер автокликов
+        setInterval(() => {
+            if (gps > 0) {
+                score += gps / 10;
+                updateUI();
+            }
+        }, 100);
+
+        updateUI();
+    </script>
+</body>
+</html>
