@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-select=none">
+    <title>Размер Вселенной | Интерактивный масштаб</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #05070f;
+            color: #ffffff;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            overflow: hidden;
+            touch-action: none; /* Запрещает стандартный скролл всей страницы браузером */
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+        }
+
+        /* Адаптивная кнопка НАЗАД */
+        .back-button {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 14px;
+            background-color: #1e2640;
+            color: #f3f4f6;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.2s ease;
+            z-index: 100;
+        }
+
+        .back-button:hover {
+            background-color: #2e3b66;
+            border-color: rgba(167, 139, 250, 0.4);
+            box-shadow: 0 0 15px rgba(167, 139, 250, 0.2);
+            transform: translateX(-2px);
+        }
+
+        header {
+            text-align: center;
+            padding: 15px;
+            margin-top: 60px; /* Сдвиг вниз, чтобы кнопка назад не перекрывала текст */
+            z-index: 10;
+        }
+
+        h1 {
+            margin: 0 0 5px 0;
+            font-size: 1.6rem;
+            background: linear-gradient(45deg, #a78bfa, #34d399);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hint {
+            color: #6b7280;
+            font-size: 0.85rem;
+            margin: 0;
+        }
+
+        /* Контейнер для отображения объекта */
+        .viewer-container {
+            position: relative;
+            width: 100%;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            perspective: 1000px;
+        }
+
+        .object-visual {
+            font-size: clamp(100px, 25vh, 160px); /* Подстраиваем размер эмодзи под высоту дисплея */
+            transition: transform 0.1s cubic-bezier(0.1, 0.8, 0.3, 1);
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .object-info {
+            text-align: center;
+            margin-top: 20px;
+            padding: 0 15px;
+            min-height: 70px;
+        }
+
+        .object-name {
+            font-size: 1.4rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .object-size {
+            font-size: 1rem;
+            color: #34d399;
+            word-break: break-all;
+        }
+
+        /* Панель управления со слайдером */
+        .controls {
+            width: 100%;
+            max-width: 500px;
+            padding: 20px;
+            box-sizing: border-box;
+            z-index: 10;
+            margin-bottom: 10px;
+        }
+
+        .slider {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 10px;
+            border-radius: 5px;
+            background: #1f2937;
+            outline: none;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 28px; /* Удобный размер для нажатия пальцем */
+            height: 28px;
+            border-radius: 50%;
+            background: #a78bfa;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(167, 139, 250, 0.5);
+        }
+
+        /* Для маленьких или горизонтальных экранов */
+        @media (max-height: 500px) {
+            header { margin-top: 0; padding: 5px; }
+            h1 { font-size: 1.2rem; }
+            .hint { display: none; }
+            .object-info { min-height: 50px; margin-top: 5px; }
+            .object-name { font-size: 1.1rem; }
+            .object-size { font-size: 0.9rem; }
+            .controls { padding: 10px; }
+        }
+    </style>
+</head>
+<body>
+
+    <a href="../index.html" class="back-button">
+        <span>←</span> Главная
+    </a>
+
+    <header>
+        <h1>Масштаб Вселенной</h1>
+        <p class="hint">Управляйте скроллом, стрелочками (← →) или листайте экран пальцем</p>
+    </header>
+
+    <div class="viewer-container" id="viewer">
+        <div class="object-visual" id="visual">⚛️</div>
+        <div class="object-info">
+            <div class="object-name" id="name">Атом водорода</div>
+            <div class="object-size" id="size">0.0000000001 м (10⁻¹⁰ м)</div>
+        </div>
+    </div>
+
+    <div class="controls">
+        <input type="range" min="0" max="6" value="0" step="1" class="slider" id="scaleSlider">
+    </div>
+
+    <script>
+        const universeData = [
+            { name: "Атом водорода", size: "0.0000000001 м (10⁻¹⁰ м)", icon: "⚛️" },
+            { name: "ДНК человека", size: "0.0000000025 м (2.5 нм)", icon: "🧬" },
+            { name: "Муравей", size: "0.005 м (5 мм)", icon: "🐜" },
+            { name: "Человек", size: "1.7 метров", icon: "🧍" },
+            { name: "Планета Земля", size: "12,742,000 метров", icon: "🌍" },
+            { name: "Солнце", size: "1,392,700,000 метров", icon: "☀️" },
+            { name: "Галактика Млечный Путь", size: "1,000,000,000,000,000,000,000 м", icon: "🌌" }
+        ];
+
+        const slider = document.getElementById('scaleSlider');
+        const visual = document.getElementById('visual');
+        const nameEl = document.getElementById('name');
+        const sizeEl = document.getElementById('size');
+        const viewer = document.getElementById('viewer');
+
+        let currentIndex = 0;
+
+        function updateObject(index) {
+            const data = universeData[index];
+            visual.style.transform = 'scale(0.3)';
+            
+            setTimeout(() => {
+                visual.textContent = data.icon;
+                nameEl.textContent = data.name;
+                sizeEl.textContent = data.size;
+                visual.style.transform = 'scale(1)';
+            }, 80);
+        }
+
+        // Событие ползунка
+        slider.addEventListener('input', (e) => {
+            currentIndex = parseInt(e.target.value);
+            updateObject(currentIndex);
+        });
+
+        // Событие мыши (для ПК)
+        viewer.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            handleDirection(e.deltaY > 0 ? 1 : -1);
+        }, { passive: false });
+
+        // Управление стрелками клавиатуры (для ПК)
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowUp' || e.key === 'ArrowRight') {
+                e.preventDefault();
+                handleDirection(1);
+            } else if (e.key === 'ArrowDown' || e.key === 'ArrowLeft') {
+                e.preventDefault();
+                handleDirection(-1);
+            }
+        });
+
+        // --- ИСПРАВЛЕННЫЕ СВАЙПЫ ДЛЯ СМАРТФОНОВ ---
+        let touchStartY = 0;
+        let touchEndY = 0;
+
+        viewer.addEventListener('touchstart', (e) => {
+            touchStartY = e.changedTouches[0].screenY;
+        }, { passive: true });
+
+        // Важное событие: отменяем системную прокрутку браузера во время жеста
+        viewer.addEventListener('touchmove', (e) => {
+            if (e.cancelable) e.preventDefault(); 
+        }, { passive: false });
+
+        viewer.addEventListener('touchend', (e) => {
+            touchEndY = e.changedTouches[0].screenY;
+            handleSwipe();
+        }, { passive: true });
+
+        function handleSwipe() {
+            const swipeDistance = touchStartY - touchEndY;
+            const threshold = 40; // Чувствительность жеста
+            
+            if (Math.abs(swipeDistance) > threshold) {
+                if (swipeDistance > 0) {
+                    handleDirection(1);  // Свайп вверх — отдаляем
+                } else {
+                    handleDirection(-1); // Свайп вниз — приближаем
+                }
+            }
+        }
+
+        function handleDirection(direction) {
+            if (direction > 0) {
+                if (currentIndex < universeData.length - 1) {
+                    currentIndex++;
+                }
+            } else {
+                if (currentIndex > 0) {
+                    currentIndex--;
+                }
+            }
+            slider.value = currentIndex;
+            updateObject(currentIndex);
+        }
+    </script>
+</body>
+</html>

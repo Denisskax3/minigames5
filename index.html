@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Креативная Песочница | Мои Мини-Игры</title>
+    <style>
+        :root {
+            --bg-color: #0b0f19;
+            --card-bg: #1e2640;
+            --text-color: #f3f4f6;
+            --accent-color: #3b82f6;
+            --accent-hover: #60a5fa;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            padding: 2rem 1.5rem; /* Оптимальные отступы для ПК */
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(45deg, #a78bfa, #34d399);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        header p {
+            color: #9ca3af;
+            font-size: 1.1rem;
+        }
+
+        main {
+            flex-grow: 1;
+        }
+
+        /* Адаптивная сетка flex/grid */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+            text-decoration: none;
+            color: inherit;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        /* На мобильных устройствах ховер-эффект может «залипать», 
+           поэтому оставляем его полноценным только для экранов с мышкой */
+        @media (hover: hover) {
+            .card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 10px 30px rgba(167, 139, 250, 0.2);
+                border-color: rgba(167, 139, 250, 0.4);
+            }
+        }
+
+        /* Активное состояние при нажатии пальцем на мобильном */
+        .card:active {
+            transform: scale(0.98);
+            background-color: #232d4b;
+        }
+
+        .card-preview {
+            height: 160px;
+            background: linear-gradient(135deg, #5b21b6, #a78bfa);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3.5rem;
+            user-select: none;
+        }
+
+        /* Цвета для будущих карточек */
+        .card:nth-child(2) .card-preview { background: linear-gradient(135deg, #1e3a8a, #3b82f6); }
+        .card:nth-child(3) .card-preview { background: linear-gradient(135deg, #065f46, #10b981); }
+
+        .card-content {
+            padding: 1.5rem;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card-title {
+            font-size: 1.3rem;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .card-description {
+            color: #9ca3af;
+            font-size: 0.95rem;
+            line-height: 1.4;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 4rem;
+            color: #4b5563;
+            font-size: 0.9rem;
+            padding: 1rem 0;
+        }
+
+        /* --- МЕДИА-ЗАПРОСЫ ДЛЯ СМАРТФОНОВ --- */
+        @media (max-width: 480px) {
+            body {
+                padding: 1.5rem 1rem; /* Уменьшаем внешние отступы сайта */
+            }
+
+            header {
+                margin-bottom: 2rem;
+            }
+
+            header h1 {
+                font-size: 1.8rem; /* Уменьшаем главный заголовок */
+            }
+
+            header p {
+                font-size: 0.95rem;
+            }
+
+            .grid {
+                gap: 1.25rem; /* Карточки на мобильном лежат чуть плотнее */
+                grid-template-columns: 1fr; /* Строго одна колонка на весь экран */
+            }
+
+            .card-preview {
+                height: 130px; /* Немного уменьшаем высоту шапки карточки */
+                font-size: 3rem;
+            }
+
+            .card-content {
+                padding: 1.2rem; /* Уменьшаем внутренние поля текста */
+            }
+
+            .card-title {
+                font-size: 1.15rem;
+            }
+
+            .card-description {
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Креативная Песочница</h1>
+        <p>Коллекция залипательных мини-игр и интерактивных проектов</p>
+    </header>
+
+    <main>
+        <div class="grid">
+            <!-- Карточка 1: Переход на "Размер Вселенной" -->
+            <a href="games/universe-size.html" class="card">
+                <div class="card-preview">🌌</div>
+                <div class="card-content">
+                    <div class="card-title">Масштаб Вселенной</div>
+                    <div class="card-description">Прокручивайте колесико мыши или листайте пальцем, чтобы изучить масштаб мира от атома до галактик.</div>
+                </div>
+            </a>
+
+            <!-- Карточка 2: Заглушка -->
+<!-- Карточка 2: Теперь ведет на полноценную рабочую игру -->
+<a href="games/spend-money.html" class="card">
+    <div class="card-preview">💰</div>
+    <div class="card-content">
+        <div class="card-title">Потрать деньги миллиардера</div>
+        <div class="card-description">Попробуй скупить дорогие вещи и опустошить огромный банковский счет.</div>
+    </div>
+</a>
+
+
+            <!-- Карточка 3: Заглушка -->
+            <a href="#" class="card" onclick="alert('Эта игра в разработке!'); return false;">
+                <div class="card-preview">⚡</div>
+                <div class="card-content">
+                    <div class="card-title">Бесконечный Кликер</div>
+                    <div class="card-description">Нажимай, зарабатывай очки и покупай безумные улучшения. (Скоро)</div>
+                </div>
+            </a>
+        </div>
+    </main>
+
+    <footer>
+        <p>© 2026 Интерактивная Песочница. Вдохновлено Neal.fun</p>
+    </footer>
+
+</body>
+</html>
